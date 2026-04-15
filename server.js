@@ -730,8 +730,8 @@ setInterval(() => {
 // ==========================================
 // STARTUP & GAME END
 // ==========================================
-server.listen(PORT, () => {
-    console.log(`CHROMATRACE lancé sur http://localhost:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`CHROMATRACE est en ligne sur le port ${PORT}`);
 });
 
 function endGame() {
