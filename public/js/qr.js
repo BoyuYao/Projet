@@ -13,34 +13,51 @@
         const container = document.getElementById('qr-canvas');
         if (!container) return;
 
+        // On nettoie le conteneur avant de générer pour éviter les doublons
+        container.innerHTML = "";
+
         try {
             new QRCode(container, {
                 text:         url,
-                width:        150,
-                height:       150,
+                width:        160,
+                height:       160,
                 colorDark:    '#0f172a',
                 colorLight:   '#ffffff',
                 correctLevel: QRCode.CorrectLevel.M,
             });
-            document.getElementById('server-url').innerText = url;
+            const urlBox = document.getElementById('server-url');
+            if (urlBox) urlBox.innerText = url;
         } catch (e) {
             console.error('QR error:', e);
         }
     }
 
-    // Reçoit l'IP réelle via le socket existant (partagé avec projector.js)
-    socket.on('state', function (p) {
-        if (p.serverIp && !qrDone) {
-            afficherQR('http://' + p.serverIp + ':3000/controller.html');
+    // Dès que la page charge, on décide de l'URL
+    window.addEventListener('DOMContentLoaded', function () {
+        const host = window.location.hostname;
+
+        // Cas 1 : On est sur internet (Railway)
+        if (host !== 'localhost' && host !== '127.0.0.1') {
+            // "origin" récupère automatiquement https://projet-production... sans port :3000
+            const finalUrl = window.location.origin + '/controller.html';
+            afficherQR(finalUrl);
+        }
+        // Cas 2 : On est en local, on génère une base avec localhost en attendant l'IP du serveur
+        else {
+            afficherQR('http://' + host + ':3000/controller.html');
         }
     });
 
-    // Fallback : si la page est déjà servie depuis la bonne IP
-    window.addEventListener('DOMContentLoaded', function () {
+    // Écoute du serveur : on n'utilise l'IP du serveur QUE si on est en développement local
+    socket.on('state', function (p) {
         const host = window.location.hostname;
-        if (host && host !== 'localhost' && host !== '127.0.0.1') {
-            const port = window.location.port || '3000';
-            afficherQR('http://' + host + ':' + port + '/controller.html');
+        
+        // Si on est en local et que le serveur nous donne son IP (ex: 192.168.1.15)
+        if ((host === 'localhost' || host === '127.0.0.1') && p.serverIp) {
+            // On autorise la mise à jour du QR Code avec la vraie IP locale
+            qrDone = false; 
+            afficherQR('http://' + p.serverIp + ':3000/controller.html');
         }
+        // Si on est sur Railway, on ignore p.serverIp !
     });
 }());
