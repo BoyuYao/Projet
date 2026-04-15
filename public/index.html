@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHROMATRACE</title>
+
+    <!-- Polices -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/index.css">
+
+    <!-- Librairies -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+    <!-- ── Lobby ──────────────────────────────────────────── -->
+    <div id="lobby-screen">
+        <div class="logo-title">CHROMATRACE</div>
+
+        <div class="lobby-panels">
+
+            <!-- Panneau connexion + QR code -->
+            <div class="panel connect-panel">
+                <div class="panel-title">⚡ Rejoindre</div>
+                <div class="qr-wrapper">
+                    <div id="qr-canvas"></div>
+                </div>
+                <div class="connect-url" id="server-url">En attente de l'IP...</div>
+                <p class="connect-hint">
+                    📱 Scannez avec l'appareil photo<br>
+                    ou tapez l'URL dans le navigateur
+                </p>
+            </div>
+
+            <!-- Panneau joueurs connectés -->
+            <div class="panel players-panel">
+                <div class="panel-title">Joueurs connectés</div>
+                <div class="player-count">
+                    <span id="player-count-num" class="player-count-num">0</span>
+                    <span class="player-count-max"> / 30</span>
+                </div>
+                <div id="player-list"></div>
+            </div>
+
+            <!-- Panneau paramètres -->
+            <div class="panel settings-panel">
+                <div class="panel-title">⚙ Paramètres</div>
+
+                <div class="setting-row">
+                    <span class="setting-label">Durée</span>
+                    <div class="setting-value">
+                        <button type="button" class="btn-small" onclick="changeDuration(-30)">−</button>
+                        <span class="value-display" id="duration-display">3:00</span>
+                        <button type="button" class="btn-small" onclick="changeDuration(30)">+</button>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <span class="setting-label">Items</span>
+                    <button class="toggle-btn on" id="items-toggle" onclick="toggleItems()">ON</button>
+                </div>
+
+                <div class="setting-row">
+                    <span class="setting-label">Vitesse bonus</span>
+                    <button type="button" class="toggle-btn on" id="boost-toggle" onclick="toggleBoost()">ON</button>
+                </div>
+
+                <div class="setting-row">
+                    <span class="setting-label">Fin si tous éliminés</span>
+                    <button type="button" class="toggle-btn on" id="autoend-toggle" onclick="toggleAutoEnd()">ON</button>
+                </div>
+            </div>
+
+        </div>
+
+        <button type="button" class="btn-start" id="start-btn" onclick="startGame()" disabled>
+            LANCER LA PARTIE
+        </button>
+
+        <button type="button" class="btn-rules" onclick="openRulesPanel()">
+            RÈGLES & HISTOIRE
+        </button>
+    </div>
+
+    <!-- ── Panneau règles / histoire ───────────────────────── -->
+    <div id="rules-overlay" class="rules-overlay" aria-hidden="true">
+        <div class="rules-card" role="dialog" aria-modal="true" aria-labelledby="rules-title">
+            <button type="button" class="rules-close" onclick="closeRulesPanel()">✕</button>
+
+            <div class="rules-header">
+                <img src="assets/logo.png" alt="Logo CHROMATRACE" class="rules-logo">
+                <div>
+                    <div class="rules-kicker">GUIDE RAPIDE</div>
+                    <h2 id="rules-title" class="rules-title">RÈGLES DU JEU</h2>
+                </div>
+            </div>
+
+            <div class="rules-grid">
+                <section class="rules-section">
+                    <h3>Objectif</h3>
+                    <p>
+                        Conquérir le plus de territoire avant la fin du timer.
+                        Chaque cellule contrôlée augmente ton score.
+                    </p>
+                </section>
+
+                <section class="rules-section">
+                    <h3>Comment capturer</h3>
+                    <ul>
+                        <li>Quitte ta zone pour tracer une ligne.</li>
+                        <li>Referme la boucle en revenant dans ton territoire.</li>
+                        <li>La zone enfermée devient ta propriété.</li>
+                    </ul>
+                </section>
+
+                <section class="rules-section">
+                    <h3>Éliminations</h3>
+                    <ul>
+                        <li>Si un adversaire coupe ta trace, tu es éliminé.</li>
+                        <li>Si tu touches le bord de la carte, tu es éliminé.</li>
+                        <li>Les bonus peuvent changer l’issue des duels.</li>
+                    </ul>
+                </section>
+
+                <section class="rules-section">
+                    <h3>Histoire CHROMATRACE</h3>
+                    <p>
+                        Dans une arène néon en surcharge, chaque pilote stabilise sa couleur
+                        en gravant des trajectoires énergétiques. Contrôle l’espace,
+                        neutralise les tracés ennemis et impose ta signature chromatique.
+                    </p>
+                </section>
+            </div>
+
+            <div class="rules-footer">
+                <button type="button" class="btn-rules-secondary" onclick="closeRulesPanel()">Fermer</button>
+                <button type="button" class="btn-rules-primary" onclick="closeRulesPanel()">Configurer la partie</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── HUD en jeu ──────────────────────────────────────── -->
+    <div id="hud">
+        <div class="hud-top">
+            <div id="leaderboard">
+                <div class="lb-title">CLASSEMENT</div>
+                <div id="lb-entries"></div>
+            </div>
+            <div class="hud-timer" id="timer-display">3:00</div>
+            <div class="hud-spacer"></div>
+        </div>
+    </div>
+
+    <!-- ── Canvas Phaser ───────────────────────────────────── -->
+    <div id="game-canvas"></div>
+
+    <!-- ── Écran fin de partie ─────────────────────────────── -->
+    <div id="end-screen">
+        <div class="end-title">FIN DE PARTIE</div>
+        <div class="podium" id="podium"></div>
+        <div class="final-ranking" id="final-ranking"></div>
+        <button type="button" class="btn-replay" onclick="resetGame()">↺  REJOUER</button>
+    </div>
+
+    <!-- Scripts (ordre important : socket.io → projector → main → qr) -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/projector.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/qr.js"></script>
+
+</body>
+</html>

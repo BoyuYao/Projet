@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CHROMATRACE — Manette</title>
+
+    <!-- Polices -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/controller.css">
+
+    <!-- Librairie joystick -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
+</head>
+<body>
+
+    <!-- ── Écran 1 — Login ──────────────────────────────── -->
+    <div class="screen" id="screen-login">
+        <div class="logo">CHROMATRACE</div>
+        <div class="login-subtitle">Rejoindre la partie</div>
+
+        <div class="input-group">
+            <div class="input-label">Pseudo</div>
+            <input type="text" class="pseudo-input" id="pseudo-input"
+                   placeholder="TON NOM" maxlength="12"
+                   autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+
+        <div class="input-label color-label">Couleur</div>
+        <div class="color-grid" id="color-grid"></div>
+
+        <div class="error-msg" id="error-msg"></div>
+        <button type="button" class="btn-join" onclick="joinGame()">REJOINDRE</button>
+    </div>
+
+    <!-- ── Écran 2 — Lobby (attente) ───────────────────── -->
+    <div class="screen hidden" id="screen-lobby">
+        <div class="logo logo-sm">CHROMATRACE</div>
+        <div class="lobby-name" id="lobby-name">--</div>
+        <div class="lobby-status">En attente du lancement...</div>
+        <div class="dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        <p class="lobby-hint">
+            La partie démarrera quand l'admin appuie sur<br>
+            <strong class="accent-cyan">LANCER LA PARTIE</strong>
+        </p>
+    </div>
+
+    <!-- ── Écran 3 — Jeu (joystick) ────────────────────── -->
+    <div class="screen hidden" id="screen-game">
+        <div class="game-bar">
+            <div class="info-item">
+                <span class="info-label">Joueur</span>
+                <span class="info-value" id="game-pseudo" style="color:var(--cyan)">--</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Surface</span>
+                <span class="info-value" id="game-territory">0</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Statut</span>
+                <span class="info-value" id="game-status" style="color:var(--lime)">En vie</span>
+            </div>
+        </div>
+
+        <div id="joystick-zone">
+            <div id="joystick-area"></div>
+        </div>
+
+        <div class="items-bar">
+            <img src="assets/boost.png"  class="item-indicator" id="indicator-boost"  alt="Boost">
+            <img src="assets/shield.png" class="item-indicator" id="indicator-shield" alt="Shield">
+        </div>
+    </div>
+
+    <!-- ── Écran 4 — Éliminé ────────────────────────────── -->
+    <div class="screen hidden" id="screen-eliminated">
+        <div class="elim-title">ÉLIMINÉ</div>
+        <div class="elim-line"></div>
+
+        <div class="elim-reason" id="elim-reason">Tu as été éliminé</div>
+
+        <div class="elim-score-block">
+            <span class="elim-score-label">Score à l'élimination</span>
+            <span class="elim-score-value" id="elim-score">0</span>
+            <span class="elim-score-unit">blocs capturés</span>
+        </div>
+
+        <div class="elim-eye">👁️</div>
+        <div class="elim-watch">
+            Tu es éliminé — regarde la partie<br>
+            se terminer sur l'écran principal
+        </div>
+    </div>
+
+    <!-- ── Écran 5 — Fin de partie ──────────────────────── -->
+    <div class="screen hidden" id="screen-end">
+        <div class="end-logo">CHROMATRACE</div>
+        <div class="end-rank" id="end-rank">🏁</div>
+        <div class="end-pseudo" id="end-pseudo">--</div>
+        <div class="end-score" id="end-score">-- blocs capturés</div>
+        <p class="end-message">Regarde le podium sur l'écran principal !</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/controller.js"></script>
+
+</body>
+</html>

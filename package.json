@@ -1,0 +1,15 @@
+{
+  "name": "chromatrace-phaser",
+  "version": "1.0.0",
+  "description": "Prototype CHROMATRACE en Phaser 3 + Socket.io",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1",
+    "qrcode": "^1.5.3"
+  }
+}
